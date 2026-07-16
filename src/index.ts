@@ -5,6 +5,8 @@ import { clientFromEnv } from "./lib/client.js";
 import { registerSearchCompanies } from "./tools/search-companies.js";
 import { registerLookupCompany } from "./tools/lookup-company.js";
 import { registerGetCompanyDetails } from "./tools/get-company-details.js";
+import { registerGetCompanyNetwork } from "./tools/get-company-network.js";
+import { registerGetCompanyRelations } from "./tools/get-company-relations.js";
 import { registerAdvancedSearch } from "./tools/advanced-search.js";
 import { registerCheckCompliance } from "./tools/check-compliance.js";
 import { registerGetFinancials } from "./tools/get-financials.js";
@@ -22,6 +24,8 @@ async function main(): Promise<void> {
   registerSearchCompanies(server, client);
   registerLookupCompany(server, client);
   registerGetCompanyDetails(server, client);
+  registerGetCompanyNetwork(server, client);
+  registerGetCompanyRelations(server, client);
   registerAdvancedSearch(server, client);
   registerCheckCompliance(server, client);
   registerGetFinancials(server, client);
