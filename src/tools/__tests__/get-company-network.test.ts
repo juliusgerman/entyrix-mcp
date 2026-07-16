@@ -44,4 +44,24 @@ describe("get_company_network tool", () => {
     expect(body.data.ico).toBe("00123456");
     expect(body.data.connections[0].companies[0].ico).toBe("31322832");
   });
+
+  it("passes an attested purpose through as ?purpose=", async () => {
+    getMockPool()
+      .intercept({
+        path: "/api/v1/companies/00123456/network",
+        query: { purpose: "kyc" },
+        method: "GET",
+      })
+      .reply(
+        200,
+        { data: { ico: "00123456", people: [], connections: [] }, meta: {} },
+        { headers: { "content-type": "application/json" } }
+      );
+    const client = new EntyrixClient({ apiKey: "k", baseUrl: TEST_BASE_URL });
+    const { server, tools } = createCaptureServer();
+    registerGetCompanyNetwork(server as any, client);
+    const out = await tools.get("get_company_network")!.handler({ ico: "123456", purpose: "kyc" });
+    const body = JSON.parse(out.content[0].text);
+    expect(body.data.ico).toBe("00123456");
+  });
 });

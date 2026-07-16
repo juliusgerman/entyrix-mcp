@@ -9,6 +9,15 @@ export const getCompanyRelationsInputSchema = {
     .max(8)
     .regex(/^\d{6,8}$/, "IČO must be 6-8 digits")
     .describe("6-8 digit IČO (Slovak/Czech/Estonian registry number). Leading zeros optional."),
+  purpose: z
+    .enum(["kyc", "aml", "credit", "risk_monitoring", "supplier_due_diligence"])
+    .optional()
+    .describe(
+      "Declared due-diligence purpose. Only needed for `full`-tier keys when the " +
+        "subject is a natural person (sole trader) — the API's FO gate refuses such " +
+        "subjects unless a recognised purpose is attested. Ignored for legal " +
+        "entities. Marketing/prospection is not a valid value here."
+    ),
 };
 
 const description =
@@ -32,7 +41,9 @@ export function registerGetCompanyRelations(server: McpServer, client: EntyrixCl
     },
     async (args) => {
       const ico = args.ico.padStart(8, "0");
-      const result = await client.get<unknown>(`/companies/${encodeURIComponent(ico)}/relations`);
+      const result = await client.get<unknown>(`/companies/${encodeURIComponent(ico)}/relations`, {
+        purpose: args.purpose,
+      });
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
       };
