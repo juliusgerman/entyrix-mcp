@@ -54,7 +54,7 @@ export class EntyrixClient {
         headers: {
           Authorization: `Bearer ${this.apiKey}`,
           Accept: "application/json",
-          "User-Agent": "entyrix-mcp/0.0.1",
+          "User-Agent": "entyrix-mcp/0.1.0",
         },
         signal: controller.signal,
       });

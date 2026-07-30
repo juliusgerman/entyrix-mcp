@@ -1,18 +1,29 @@
 {
   "name": "entyrix-mcp",
-  "version": "0.0.1",
-  "description": "Model Context Protocol server for the Entyrix European business-registry API. Exposes 8 stdio tools (search, lookup, details, advanced search, compliance, financials, suppliers, rankings) for LLM clients (Claude Desktop, Cursor, ChatGPT).",
+  "version": "0.1.0",
+  "description": "Model Context Protocol server for the Entyrix European business-registry (KYB) API. Exposes 10 stdio tools (search, lookup, details, network, relations, advanced search, compliance, financials, suppliers, rankings) for LLM clients (Claude Desktop, Claude Code, Cursor, ChatGPT).",
   "type": "module",
   "bin": {
     "entyrix-mcp": "bin/entyrix-mcp.js"
   },
   "main": "dist/index.js",
+  "homepage": "https://entyrix.com",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/juliusgerman/entyrix-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/juliusgerman/entyrix-mcp/issues"
+  },
   "files": [
     "bin",
     "dist",
     "README.md",
     "LICENSE"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
@@ -21,14 +32,18 @@
     "format:check": "prettier --check \"src/**/*.ts\"",
     "lint": "eslint \"src/**/*.ts\"",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run build && npm test"
   },
   "keywords": [
     "mcp",
     "model-context-protocol",
+    "company-data",
+    "kyb",
+    "eu",
+    "business-intelligence",
     "entyrix",
     "business-registry",
-    "company-data",
     "europe",
     "llm-tools"
   ],

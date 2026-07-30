@@ -18,7 +18,7 @@ async function main(): Promise<void> {
 
   const server = new McpServer({
     name: "entyrix-mcp",
-    version: "0.0.1",
+    version: "0.1.0",
   });
 
   registerSearchCompanies(server, client);

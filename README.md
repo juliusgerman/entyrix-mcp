@@ -1,6 +1,6 @@
 # entyrix-mcp
 
-Model Context Protocol (MCP) server for the [Entyrix](https://entyrix.com) European business-registry API. Exposes 8 stdio tools so LLM clients (Claude Desktop, Cursor, ChatGPT) can search, look up, and analyze companies across SK, CZ, AT, EE, SI, LV, UK (and growing).
+Model Context Protocol (MCP) server for the [Entyrix](https://entyrix.com) European business-registry (KYB) API. Exposes 10 stdio tools so LLM clients (Claude Desktop, Claude Code, Cursor, ChatGPT) can search, look up, and analyze companies across SK, CZ, AT, EE, SI, LV, UK and more (16+ jurisdictions, growing).
 
 ## 30-second quickstart
 
@@ -24,8 +24,10 @@ Get an API key at <https://entyrix.com>.
 | Tool | Description |
 |---|---|
 | `search_companies` | Fuzzy/typo-tolerant name search (12 ms p95, powered by autocomplete index) |
-| `lookup_company` | Resolve a company by national registry ID, country-aware (SK/CZ/AT/EE/SI/LV) |
+| `lookup_company` | Resolve a company by national registry ID, country-aware (SK/CZ/AT/EE/SI/LV/…) |
 | `get_company_details` | Full profile: financials, tech stack, security, NIS2, sanctions, credit grade |
+| `get_company_network` | Shared-officer graph — related entities via common directors/officers |
+| `get_company_relations` | Directors, UBO / beneficial owners, M&A and succession links |
 | `advanced_search` | 38-key filter search (country, NACE, turnover, credit grade, …) |
 | `check_compliance` | AML / sanctions / debtor lists / RPVS check (SK) |
 | `get_financials` | Last N years of turnover, profit, EBITDA, ROA, ROE |
@@ -60,7 +62,31 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) o
 }
 ```
 
-Restart Claude Desktop. The 8 tools appear in the tools panel.
+Restart Claude Desktop. The 10 tools appear in the tools panel.
+
+### Claude Code
+
+Register the server from any project (writes to `~/.claude.json`):
+
+```bash
+claude mcp add entyrix --env ENTYRIX_API_KEY=your-api-key-here -- npx -y entyrix-mcp
+```
+
+Or add it manually to `.mcp.json` in your project root (checked in) / `~/.claude.json` (global):
+
+```json
+{
+  "mcpServers": {
+    "entyrix": {
+      "command": "npx",
+      "args": ["-y", "entyrix-mcp"],
+      "env": {
+        "ENTYRIX_API_KEY": "your-api-key-here"
+      }
+    }
+  }
+}
+```
 
 ### Cursor
 
@@ -90,7 +116,7 @@ ChatGPT does not consume MCP stdio servers directly today. Two integration paths
 openapi: 3.1.0
 info:
   title: Entyrix
-  version: 0.0.1
+  version: 0.1.0
 servers:
   - url: https://entyrix.com/api/v1
 paths:

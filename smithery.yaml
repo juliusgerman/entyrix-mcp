@@ -1,0 +1,24 @@
+startCommand:
+  type: stdio
+  configSchema:
+    type: object
+    required: ["entyrixApiKey"]
+    properties:
+      entyrixApiKey:
+        type: string
+        title: Entyrix API key
+        description: Bearer token from https://entyrix.com (dashboard → API keys)
+      entyrixBaseUrl:
+        type: string
+        title: Base URL
+        default: https://entyrix.com
+        description: Override for staging / self-hosted Entyrix
+  commandFunction: |
+    (config) => ({
+      command: "npx",
+      args: ["-y", "entyrix-mcp"],
+      env: {
+        ENTYRIX_API_KEY: config.entyrixApiKey,
+        ...(config.entyrixBaseUrl ? { ENTYRIX_BASE_URL: config.entyrixBaseUrl } : {})
+      }
+    })
