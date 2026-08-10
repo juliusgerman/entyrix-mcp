@@ -17,12 +17,18 @@ export const findSuppliersInputSchema = {
     .optional()
     .describe("Max contracts (default 50, cap 500)"),
   years: z.string().optional().describe("Restrict to recent years, e.g. '3' for the last 3"),
-  // No `offset`. The route reads `limit` and `years` and nothing else, so the
-  // pagination parameter this tool used to declare was silently dropped:
-  // measured 2026-08-10, `limit=2&offset=0` and `limit=2&offset=3` returned the
-  // SAME first contract. An agent walking pages would have re-read page one
-  // forever and concluded the supplier had few contracts. Raise `limit` (cap
-  // 500) instead; add real paging server-side before declaring it here.
+  // `offset` was removed on 2026-08-10 and is back because the route now reads
+  // it. Until then it was declared here and silently dropped: `limit=2&offset=0`
+  // and `limit=2&offset=3` returned the SAME first contract, so an agent walking
+  // pages re-read page one forever and concluded the supplier had few contracts.
+  // `data.pagination.total` is the row count to page against — measured on
+  // Slovnaft (31322832) it is 764, i.e. 264 rows past the `limit` cap of 500.
+  offset: z
+    .number()
+    .int()
+    .min(0)
+    .optional()
+    .describe("Skip this many contracts; page with data.pagination.total"),
 };
 
 const description =
@@ -46,6 +52,7 @@ export function registerFindSuppliers(server: McpServer, client: EntyrixClient):
       const result = await client.get<unknown>(`/companies/${encodeURIComponent(ico)}/contracts`, {
         limit: args.limit,
         years: args.years,
+        offset: args.offset,
       });
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
