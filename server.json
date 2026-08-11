@@ -10,7 +10,7 @@
   "packages": [
     {
       "registryType": "npm",
-      "identifier": "entyrix-mcp",
+      "identifier": "@entyrix/mcp",
       "version": "0.1.1",
       "transport": {
         "type": "stdio"

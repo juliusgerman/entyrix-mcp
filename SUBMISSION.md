@@ -1,15 +1,15 @@
 # entyrix-mcp — directory submission kit
 
 Drafted metadata + copy for each MCP directory / registry. Copy-paste per target.
-Publish `entyrix-mcp` to npm first (that is the canonical distribution the directories reference).
+Publish `@entyrix/mcp` to npm first (that is the canonical distribution the directories reference).
 
 ---
 
 ## Shared facts (single source of truth)
 
-- **Package name:** `entyrix-mcp` (npm)
+- **Package name:** `@entyrix/mcp` (npm, org-owned; the binary it installs is still `entyrix-mcp`)
 - **Version at first submit:** `0.1.0`
-- **Transport:** stdio (local, spawned via `npx -y entyrix-mcp`)
+- **Transport:** stdio (local, spawned via `npx -y @entyrix/mcp`)
 - **Runtime:** Node.js ≥ 18
 - **Auth:** `ENTYRIX_API_KEY` env var (Bearer token from https://entyrix.com)
 - **License:** MIT
@@ -53,7 +53,7 @@ https://smithery.ai/new (connect the GitHub repo).
 
 **Fields:**
 - **Display name:** Entyrix
-- **Qualified name / slug:** `entyrix-mcp` (or `@juliusgerman/entyrix-mcp`)
+- **Qualified name / slug:** `entyrix-mcp` (the GitHub repo name; the npm coordinate is `@entyrix/mcp`)
 - **GitHub repo:** https://github.com/juliusgerman/entyrix-mcp
 - **Description:** *(short description above)*
 - **Homepage:** https://entyrix.com
@@ -81,7 +81,7 @@ startCommand:
   commandFunction: |
     (config) => ({
       command: "npx",
-      args: ["-y", "entyrix-mcp"],
+      args: ["-y", "@entyrix/mcp"],
       env: {
         ENTYRIX_API_KEY: config.entyrixApiKey,
         ...(config.entyrixBaseUrl ? { ENTYRIX_BASE_URL: config.entyrixBaseUrl } : {})
@@ -122,7 +122,7 @@ https://github.com/modelcontextprotocol/servers adding a row under
   "packages": [
     {
       "registryType": "npm",
-      "identifier": "entyrix-mcp",
+      "identifier": "@entyrix/mcp",
       "version": "0.1.0",
       "transport": { "type": "stdio" },
       "environmentVariables": [

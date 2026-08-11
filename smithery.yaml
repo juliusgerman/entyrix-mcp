@@ -16,7 +16,7 @@ startCommand:
   commandFunction: |
     (config) => ({
       command: "npx",
-      args: ["-y", "entyrix-mcp"],
+      args: ["-y", "@entyrix/mcp"],
       env: {
         ENTYRIX_API_KEY: config.entyrixApiKey,
         ...(config.entyrixBaseUrl ? { ENTYRIX_BASE_URL: config.entyrixBaseUrl } : {})

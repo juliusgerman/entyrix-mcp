@@ -1,11 +1,14 @@
-# entyrix-mcp
+# @entyrix/mcp
+
+[![npm](https://img.shields.io/npm/v/@entyrix/mcp)](https://www.npmjs.com/package/@entyrix/mcp)
+
 
 Model Context Protocol (MCP) server for the [Entyrix](https://entyrix.com) European business-registry (KYB) API. Exposes 10 stdio tools so LLM clients (Claude Desktop, Claude Code, Cursor, ChatGPT) can search, look up, and analyze companies across SK, CZ, AT, EE, SI, LV, UK and more (16+ jurisdictions, growing).
 
 ## 30-second quickstart
 
 ```bash
-npm install -g entyrix-mcp
+npm install -g @entyrix/mcp
 export ENTYRIX_API_KEY=your-api-key-here
 entyrix-mcp
 ```
@@ -14,7 +17,7 @@ Or run without installing:
 
 ```bash
 export ENTYRIX_API_KEY=your-api-key-here
-npx entyrix-mcp
+npx @entyrix/mcp
 ```
 
 Get an API key at <https://entyrix.com>.
@@ -53,7 +56,7 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) o
   "mcpServers": {
     "entyrix": {
       "command": "npx",
-      "args": ["-y", "entyrix-mcp"],
+      "args": ["-y", "@entyrix/mcp"],
       "env": {
         "ENTYRIX_API_KEY": "your-api-key-here"
       }
@@ -69,7 +72,7 @@ Restart Claude Desktop. The 10 tools appear in the tools panel.
 Register the server from any project (writes to `~/.claude.json`):
 
 ```bash
-claude mcp add entyrix --env ENTYRIX_API_KEY=your-api-key-here -- npx -y entyrix-mcp
+claude mcp add entyrix --env ENTYRIX_API_KEY=your-api-key-here -- npx -y @entyrix/mcp
 ```
 
 Or add it manually to `.mcp.json` in your project root (checked in) / `~/.claude.json` (global):
@@ -79,7 +82,7 @@ Or add it manually to `.mcp.json` in your project root (checked in) / `~/.claude
   "mcpServers": {
     "entyrix": {
       "command": "npx",
-      "args": ["-y", "entyrix-mcp"],
+      "args": ["-y", "@entyrix/mcp"],
       "env": {
         "ENTYRIX_API_KEY": "your-api-key-here"
       }
@@ -97,7 +100,7 @@ Edit `.cursor/mcp.json` in your workspace (or `~/.cursor/mcp.json` for global):
   "mcpServers": {
     "entyrix": {
       "command": "npx",
-      "args": ["-y", "entyrix-mcp"],
+      "args": ["-y", "@entyrix/mcp"],
       "env": {
         "ENTYRIX_API_KEY": "your-api-key-here"
       }

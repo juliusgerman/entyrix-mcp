@@ -55,4 +55,19 @@ describe("VERSION", () => {
     expect(pkg.mcpName).toBe(server.name);
     expect(pkg.mcpName).toMatch(/^io\.github\.[\w-]+\/[\w.-]+$/);
   });
+  it("the npm coordinate is the org-scoped one, and mcpName is NOT", () => {
+    // Two names that look alike and are not: the npm package moved under the
+    // `entyrix` org on 2026-08-11, while the MCP registry namespace stays
+    // GitHub-derived and must keep the repo's name. Renaming one and not the
+    // other passes every other check here and fails at directory submission.
+    const pkg = read("package.json") as {
+      name: string;
+      mcpName: string;
+      bin: Record<string, string>;
+    };
+    expect(pkg.name).toBe("@entyrix/mcp");
+    expect(pkg.mcpName).toBe("io.github.juliusgerman/entyrix-mcp");
+    // The installed command is unaffected by the scope — users still type this.
+    expect(Object.keys(pkg.bin)).toEqual(["entyrix-mcp"]);
+  });
 });
