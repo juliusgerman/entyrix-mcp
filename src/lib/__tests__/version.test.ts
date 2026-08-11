@@ -43,4 +43,16 @@ describe("VERSION", () => {
     const pkg = read("package.json") as { name: string };
     for (const p of s.packages) expect(p.identifier).toBe(pkg.name);
   });
+  it("carries the mcpName the official registry validates ownership with", () => {
+    // The registry's npm validator fetches this package's version metadata and
+    // refuses the server unless package.json's `mcpName` equals server.json's
+    // `name` — see internal/validators/registries/npm.go in
+    // modelcontextprotocol/registry. Missing it means the directory submission
+    // fails, and since npm metadata comes from the tarball, fixing it costs a
+    // republish. Cheaper to assert here.
+    const pkg = read("package.json") as { mcpName?: string };
+    const server = read("server.json") as { name: string };
+    expect(pkg.mcpName).toBe(server.name);
+    expect(pkg.mcpName).toMatch(/^io\.github\.[\w-]+\/[\w.-]+$/);
+  });
 });
