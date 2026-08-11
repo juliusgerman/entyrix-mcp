@@ -190,3 +190,24 @@ gh repo edit --add-topic mcp,model-context-protocol,kyb,company-data,business-in
 4. Submit to Smithery (connect repo).
 5. `mcp-publisher publish` → MCP Registry.
 6. PR to `modelcontextprotocol/servers` README.
+
+---
+
+## Stav submitov — namerané 2026-08-11 (nie odhad)
+
+| Cieľ | Stav | Mechanizmus |
+|---|---|---|
+| **Oficiálny MCP Registry** | ✅ **HOTOVO** | `mcp-publisher publish` → `io.github.juliusgerman/entyrix-mcp@0.1.1`, overené spätným dotazom na `registry.modelcontextprotocol.io/v0/servers?search=entyrix` |
+| **PulseMCP** | ⏳ **automaticky** | Ich `/submit` hovorí: *„We ingest entries from the Official MCP Registry daily and process them weekly."* Netreba nič. Kontrola: `api.pulsemcp.com/v0beta/servers?query=entyrix` (2026-08-11: ešte 0 — týždenný cyklus) |
+| **`modelcontextprotocol/servers` README** | ❌ **zrušené** | Zoznam retired, CONTRIBUTING vyslovene neprijíma nové servery. PR by bol zavretý. |
+| **Smithery** | 🔒 **účet** | Už NEindexuje z GitHub repa so `smithery.yaml`, ako tvrdilo staršie znenie tohto dokumentu. Chce **účet** + publish **MCPB bundle** (`smithery mcp publish ./server.mcpb -n <ns>/<name>` alebo upload na `smithery.ai/new`). |
+| **mcp.so** | 🔒 **účet** | `/submit` redirectuje (307) na prihlásenie. |
+
+**Poradie hodnoty:** registry je ten, na ktorom záleží — Anthropic aj PulseMCP z neho čerpajú.
+Smithery a mcp.so sú doplnkové a stoja jeden login každý.
+
+**Pri ďalšom release** stačí bumpnúť `version` v `package.json` + `server.json`, `npm publish`
+a `mcp-publisher publish`. Login do registry drží token, netreba ho opakovať.
+
+**Limit, na ktorý sa dá naraziť:** `server.json.description` musí byť **≤ 100 znakov** — registry
+inak vráti 422. Strážené testom (`src/lib/__tests__/version.test.ts`).
