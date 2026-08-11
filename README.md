@@ -23,12 +23,12 @@ Get an API key at <https://entyrix.com>.
 
 | Tool | Description |
 |---|---|
-| `search_companies` | Fuzzy/typo-tolerant name search (12 ms p95, powered by autocomplete index) |
+| `search_companies` | Fuzzy/typo-tolerant name search (server-side 26-62 ms cold, ~1 ms cached; measured 2026-08-11) |
 | `lookup_company` | Resolve a company by national registry ID, country-aware (SK/CZ/AT/EE/SI/LV/…) |
 | `get_company_details` | Full profile: financials, tech stack, security, NIS2, sanctions, credit grade |
 | `get_company_network` | Shared-officer graph — related entities via common directors/officers |
 | `get_company_relations` | Directors, UBO / beneficial owners, M&A and succession links |
-| `advanced_search` | 38-key filter search (country, NACE, turnover, credit grade, …) |
+| `advanced_search` | 57-key filter search (country, NACE, turnover, credit grade, NIS2, sanctions, tech, …) |
 | `check_compliance` | AML / sanctions / debtor lists / RPVS check (SK) |
 | `get_financials` | Last N years of turnover, profit, EBITDA, ROA, ROE |
 | `find_suppliers` | Public-sector contracts where company is supplier (SK CRZ) |

@@ -2,6 +2,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { clientFromEnv } from "./lib/client.js";
+import { VERSION } from "./lib/version.js";
 import { registerSearchCompanies } from "./tools/search-companies.js";
 import { registerLookupCompany } from "./tools/lookup-company.js";
 import { registerGetCompanyDetails } from "./tools/get-company-details.js";
@@ -18,7 +19,7 @@ async function main(): Promise<void> {
 
   const server = new McpServer({
     name: "entyrix-mcp",
-    version: "0.1.0",
+    version: VERSION,
   });
 
   registerSearchCompanies(server, client);

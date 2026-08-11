@@ -36,9 +36,9 @@ Publish `entyrix-mcp` to npm first (that is the canonical distribution the direc
 > Entyrix MCP exposes the Entyrix European business-data API to any MCP client
 > (Claude Desktop, Claude Code, Cursor, ChatGPT via Actions). It backs KYB,
 > due-diligence, sales-intelligence and compliance workflows: fuzzy company
-> search (12 ms p95), country-aware registry-ID resolution, full company
+> search, country-aware registry-ID resolution, full company
 > profiles (financials, tech stack, security posture, NIS2, sanctions, credit
-> grade), 38-key advanced filtering, multi-year financial statements,
+> grade), 57-key advanced filtering, multi-year financial statements,
 > public-sector supplier contracts, shared-officer / UBO relation graphs, and
 > pre-computed leaderboards — across SK, CZ, AT, EE, SI, LV, UK and more.
 > Configure with a single `ENTYRIX_API_KEY`. Runs locally over stdio.

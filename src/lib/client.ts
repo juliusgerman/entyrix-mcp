@@ -3,6 +3,8 @@
 // - Normalized error envelope: throws EntyrixApiError with status + code
 // - JSON-only (every wrapped endpoint returns JSON)
 
+import { VERSION } from "./version.js";
+
 export interface EntyrixClientConfig {
   apiKey: string;
   baseUrl?: string;
@@ -54,7 +56,7 @@ export class EntyrixClient {
         headers: {
           Authorization: `Bearer ${this.apiKey}`,
           Accept: "application/json",
-          "User-Agent": "entyrix-mcp/0.1.0",
+          "User-Agent": `entyrix-mcp/${VERSION}`,
         },
         signal: controller.signal,
       });

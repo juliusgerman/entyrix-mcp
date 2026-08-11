@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Single job on purpose: GitHub bills every job rounded up to a whole minute,
+# so five ten-second jobs cost more than one two-minute job. Every step carries
+# `if: always()` so a red format check cannot hide a red test — splitting for
+# isolation and then letting the first failure mask the rest would buy nothing.
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+
+      - name: format
+        if: always()
+        run: npm run format:check
+
+      - name: lint
+        if: always()
+        run: npm run lint
+
+      - name: typecheck
+        if: always()
+        run: npm run typecheck
+
+      - name: unit tests (offline)
+        if: always()
+        run: npm test
+
+      - name: build
+        if: always()
+        run: npm run build
+
+      # Hits the live published spec at entyrix.com. It needs no secret — the
+      # spec is unauthenticated — which is the whole point: a secret-gated job
+      # in a repo where nobody set the secret is a green tick covering nothing.
+      # If entyrix.com is unreachable this goes RED rather than skipping, and
+      # that is deliberate: a contract check that quietly passes when it could
+      # not reach the thing it checks is worse than no check.
+      - name: API contract (live spec)
+        if: always()
+        run: npm run test:contract
+
+  alert:
+    needs: [check]
+    if: failure() && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          curl -s -H "Title: entyrix-mcp CI failed" -H "Tags: rotating_light" \
+            -d "${{ github.workflow }} failed on ${{ github.sha }} — ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            https://ntfy.sh/inger-deploy-alerts || true

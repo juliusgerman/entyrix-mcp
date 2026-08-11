@@ -33,7 +33,9 @@
     "lint": "eslint \"src/**/*.ts\"",
     "test": "vitest run",
     "test:watch": "vitest",
-    "prepublishOnly": "npm run build && npm test"
+    "prepublishOnly": "npm run build && npm test",
+    "test:contract": "vitest run --config vitest.contract.config.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "keywords": [
     "mcp",
