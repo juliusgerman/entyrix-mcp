@@ -1,0 +1,48 @@
+# One PR per ecosystem, not one per dependency.
+#
+# The default configuration opened nine PRs at once on a sibling repo, each one
+# a full CI run. Here that would be cheap (public repo, free minutes) but noisy
+# in the same way, and noise is what makes a real advisory get skipped.
+#
+# `groups` must cover `major` explicitly — without it every major bump escapes
+# into its own PR and the grouping is decorative.
+#
+# `cooldown` is the supply-chain half: auto-bumping to a version published
+# minutes ago is the main npm attack path, and this package is installed by
+# `npx` on other people's machines.
+#
+# No `labels:` on purpose — Dependabot requires the label to already exist in
+# the repo and otherwise comments an error on every PR, which is one extra
+# notification per PR for nothing.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 2
+    rebase-strategy: disabled
+    cooldown:
+      default-days: 7
+      semver-major-days: 30
+    groups:
+      npm:
+        patterns:
+          - "*"
+        update-types:
+          - minor
+          - patch
+          - major
+
+  # Actions are pinned by major tag; this keeps the security fixes flowing
+  # rather than freezing them, which is the trade a pin makes if left alone.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    rebase-strategy: disabled
+    groups:
+      actions:
+        patterns:
+          - "*"
