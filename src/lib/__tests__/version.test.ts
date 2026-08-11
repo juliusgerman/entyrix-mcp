@@ -70,4 +70,14 @@ describe("VERSION", () => {
     // The installed command is unaffected by the scope — users still type this.
     expect(Object.keys(pkg.bin)).toEqual(["entyrix-mcp"]);
   });
+  it("keeps server.json's description inside the registry's 100-char limit", () => {
+    // The registry rejects a publish with 422 / "expected length <= 100" on
+    // body.description. Found the hard way on 2026-08-11: the first publish
+    // attempt failed on a 150-character description that reads fine everywhere
+    // else. package.json's description is NOT bound by this — only the one the
+    // registry ingests — so the two are deliberately different lengths.
+    const server = read("server.json") as { description: string };
+    expect(server.description.length).toBeLessThanOrEqual(100);
+    expect(server.description.length).toBeGreaterThan(20);
+  });
 });
