@@ -8,7 +8,7 @@ Publish `@entyrix/mcp` to npm first (that is the canonical distribution the dire
 ## Shared facts (single source of truth)
 
 - **Package name:** `@entyrix/mcp` (npm, org-owned; the binary it installs is still `entyrix-mcp`)
-- **Version at first submit:** `0.1.0`
+- **Version at first submit:** `0.1.1`
 - **Transport:** stdio (local, spawned via `npx -y @entyrix/mcp`)
 - **Runtime:** Node.js ≥ 18
 - **Auth:** `ENTYRIX_API_KEY` env var (Bearer token from https://entyrix.com)
@@ -95,35 +95,31 @@ startCommand:
 
 Two related targets:
 
-**(a) `modelcontextprotocol/servers` community list** — PR to
-https://github.com/modelcontextprotocol/servers adding a row under
-"Third-Party / Community Servers" in the README:
-
-```markdown
-- **[Entyrix](https://github.com/juliusgerman/entyrix-mcp)** — European
-  business-registry (KYB) data: company search, registry-ID lookup, financials,
-  AML/sanctions compliance, supplier contracts and shared-officer network graphs
-  across 16+ EU jurisdictions.
-```
+**(a) `modelcontextprotocol/servers` community list — RETIRED, do not submit.**
+Checked 2026-08-11 against that repo's CONTRIBUTING.md: *"The README no longer
+contains a list of third-party MCP servers — that list has been retired in
+favor of the MCP Server Registry"*, and under what they don't accept: *"New
+server implementations"*. A PR adding a row would be closed. Discovery now runs
+entirely through (b).
 
 **(b) MCP Registry (`registry.modelcontextprotocol.io`)** — publish via the
 `mcp-publisher` CLI with a `server.json` in the repo root:
 
 ```json
 {
-  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-07-09/server.schema.json",
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.juliusgerman/entyrix-mcp",
   "description": "MCP server for the Entyrix European business-registry (KYB) API — search, lookup, financials, compliance and network graphs across 16+ EU jurisdictions.",
   "repository": {
     "url": "https://github.com/juliusgerman/entyrix-mcp",
     "source": "github"
   },
-  "version": "0.1.0",
+  "version": "0.1.1",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@entyrix/mcp",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "transport": { "type": "stdio" },
       "environmentVariables": [
         {
@@ -147,7 +143,7 @@ Publish flow (Julius runs — needs GitHub auth for the `io.github.*` namespace)
 
 ```bash
 # one-time: install the publisher CLI
-brew install mcp-publisher   # or: go install github.com/modelcontextprotocol/registry/cmd/mcp-publisher@latest
+brew install mcp-publisher   # 1.8.1 as of 2026-08-11
 mcp-publisher login github
 mcp-publisher publish
 ```
