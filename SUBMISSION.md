@@ -206,8 +206,27 @@ gh repo edit --add-topic mcp,model-context-protocol,kyb,company-data,business-in
 **Poradie hodnoty:** registry je ten, na ktorom záleží — Anthropic aj PulseMCP z neho čerpajú.
 Smithery a mcp.so sú doplnkové a stoja jeden login každý.
 
-**Pri ďalšom release** stačí bumpnúť `version` v `package.json` + `server.json`, `npm publish`
-a `mcp-publisher publish`. Login do registry drží token, netreba ho opakovať.
+**Pri ďalšom release** bumpni `version` v `package.json`, `server.json` (dve miesta),
+`src/lib/version.ts` a `manifest.json` — drží to `__tests__/version.test.ts` — potom:
+
+```bash
+script -q /dev/null npm publish --access public
+script -q /dev/null mcp-publisher login github   # POZRI NIŽŠIE — token expiruje
+script -q /dev/null mcp-publisher publish
+```
+
+**Poradie npm → registry je vynútené:** registry validuje, že `packages[].version` reálne
+existuje na npm a nesie `mcpName`. Obrátene dostaneš 4xx.
+
+**Registry token EXPIRUJE — počítaj s novým loginom pri každom release.** Staršie znenie
+tohto dokumentu tvrdilo opak („login drží token, netreba opakovať"); pri release 0.1.2
+(2026-08-12, deň po prvom publishi) vrátil `publish` **401 `Invalid or expired Registry JWT
+token` → `token has invalid claims: token is expired`**. Chyba príde až po úspešnom
+`npm publish`, čiže v momente, keď je verzia už nevratne vonku a registry sa s ňou rozišiel
+— preto login rob **pred** publishom, nie ako reakciu na 401.
+
+> Odstrániť sa to dá úplne: `mcp-publisher login github-oidc` funguje v GitHub Actions bez
+> uloženého tokenu, takže release na tag by publikoval do registry sám. Zatiaľ neurobené.
 
 **Limit, na ktorý sa dá naraziť:** `server.json.description` musí byť **≤ 100 znakov** — registry
 inak vráti 422. Strážené testom (`src/lib/__tests__/version.test.ts`).
