@@ -7,8 +7,12 @@ export const checkComplianceInputSchema = {
     .string()
     .min(6)
     .max(8)
-    .regex(/^\d{6,8}$/)
-    .describe("6-8 digit Slovak IČO"),
+    .regex(/^\d{6,8}$/, "IČO must be 6-8 digits")
+    .describe(
+      "6-8 digit IČO (Slovak/Czech/Estonian registry number). Leading zeros optional. " +
+        "This endpoint is keyed on the legacy IČO column, so markets whose identifier is " +
+        "not a 6-8 digit IČO are not reachable through this endpoint yet."
+    ),
 };
 
 const description =

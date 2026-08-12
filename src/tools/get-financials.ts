@@ -1,15 +1,33 @@
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { EntyrixClient } from "../lib/client.js";
+import { countryQuery, normalizeRegistryId } from "../lib/national-id.js";
 import { financialRowsToEur } from "../lib/money.js";
 
 export const getFinancialsInputSchema = {
   ico: z
     .string()
-    .min(6)
-    .max(8)
-    .regex(/^\d{6,8}$/)
-    .describe("6-8 digit IČO"),
+    .min(1)
+    .max(32)
+    .regex(
+      /^[A-Za-z0-9][A-Za-z0-9./-]{0,31}$/,
+      "national registry identifier (digits, or letters and hyphens in some registers)"
+    )
+    .describe(
+      "National registry identifier. Slovakia, Czechia and Estonia use a 6-8 digit IČO; France a 9-digit SIREN. " +
+        "Norway, Lithuania and Portugal 9 digits; Belgium 10; Switzerland CHE#########; Finland 0140168-2. " +
+        "Austria uses a Firmenbuch number like 357942k; Britain 08183069 or SC307270. Pass `country` " +
+        "for anything that is not a Slovak or Czech IČO."
+    ),
+  country: z
+    .string()
+    .length(2)
+    .optional()
+    .describe(
+      "ISO 3166-1 alpha-2 code of the register, e.g. SK or FR. " +
+        "REQUIRED for any market whose identifier is not a 6-8 digit IČO, and the only way to " +
+        "disambiguate an 8-digit IČO that exists in both SK and CZ."
+    ),
   years: z
     .number()
     .int()
@@ -44,10 +62,11 @@ export function registerGetFinancials(server: McpServer, client: EntyrixClient):
       inputSchema: getFinancialsInputSchema,
     },
     async (args) => {
-      const ico = args.ico.padStart(8, "0");
+      const ico = normalizeRegistryId(args.ico, args.country);
       const years = args.years ?? 5;
       const full = await client.get<CompanyDetailsResponse>(
-        `/companies/${encodeURIComponent(ico)}`
+        `/companies/${encodeURIComponent(ico)}`,
+        countryQuery(args.country)
       );
       const allYears = Array.isArray(full.data?.latestFinancials)
         ? full.data!.latestFinancials!
