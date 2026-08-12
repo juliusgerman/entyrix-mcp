@@ -176,14 +176,33 @@ ENTYRIX_API_KEY=your-key node dist/index.js
 
 ### Quality gates
 
-Every PR must pass:
+```bash
+npm run check   # format:check + lint + typecheck + test — the same four CI runs
+```
+
+Run `check`, not the four by hand. On 2026-08-12 a release was cut after
+`lint + typecheck + test` passed and CI went red on `format:check` — the one
+step that got skipped because it was being remembered rather than scripted.
+
+### Releasing
 
 ```bash
-npm run format
-npm run lint
-npx tsc --noEmit
-npm test
+npm run bump 0.1.5          # writes all four manifests, refuses on drift
+npm run check
+git commit -am "chore(release): 0.1.5"
+git tag v0.1.5
+git push && git push --tags   # one push, then the tag
 ```
+
+The version lives in four files and `src/lib/__tests__/version.test.ts` asserts
+they agree; `bump` is what keeps that guard from firing on every release. Push
+once — each push is a full CI run, and a release cut as four separate pushes
+bills four of them (plus two red ones for the intermediate states).
+
+`npm publish` runs from the tag via OIDC trusted publishing, so no token is
+involved. npm versions are immutable: a bad publish cannot be recalled, only
+superseded — which is why the tag is checked against `package.json` before
+anything is published.
 
 ## License
 
