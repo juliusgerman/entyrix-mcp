@@ -3,7 +3,7 @@
 [![npm](https://img.shields.io/npm/v/@entyrix/mcp)](https://www.npmjs.com/package/@entyrix/mcp)
 
 
-Model Context Protocol (MCP) server for the [Entyrix](https://entyrix.com) European business-registry (KYB) API. Exposes 10 stdio tools so LLM clients (Claude Desktop, Claude Code, Cursor, ChatGPT) can search, look up, and analyze companies across SK, CZ, AT, EE, SI, LV, UK and more (16+ jurisdictions, growing).
+Model Context Protocol (MCP) server for the [Entyrix](https://entyrix.com) European business-registry (KYB) API. Exposes 10 stdio tools so LLM clients (Claude Desktop, Claude Code, Cursor, ChatGPT) can search, look up, and analyze companies across 23 live markets (FR, GB, RO, SK, UA, GR, CZ, BE, NO, IE, FI, CH, PL, AT, CY, LT, LV, EE, SI, ES, IT, NL, HR).
 
 ## 30-second quickstart
 

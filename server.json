@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.juliusgerman/entyrix-mcp",
-  "description": "KYB data from 16+ European business registries — search, financials, compliance, network graphs",
+  "description": "KYB data from 23 European business registries — search, financials, compliance, network graphs",
   "repository": {
     "url": "https://github.com/juliusgerman/entyrix-mcp",
     "source": "github"

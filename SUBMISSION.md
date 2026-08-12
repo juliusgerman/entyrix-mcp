@@ -19,14 +19,14 @@ Publish `@entyrix/mcp` to npm first (that is the canonical distribution the dire
 - **Tools:** `search_companies`, `lookup_company`, `get_company_details`,
   `get_company_network`, `get_company_relations`, `advanced_search`,
   `check_compliance`, `get_financials`, `find_suppliers`, `list_rankings`
-- **Coverage:** SK, CZ, AT, EE, SI, LV, UK + more (16+ EU jurisdictions, growing)
+- **Coverage:** 23 live markets: FR, GB, RO, SK, UA, GR, CZ, BE, NO, IE, FI, CH, PL, AT, CY, LT, LV, EE, SI, ES, IT, NL, HR
 - **Category:** Data / Business intelligence / KYB (Know Your Business)
 
 ### One-liner (≤ 120 chars)
 > MCP server for the Entyrix European business-registry (KYB) API — search, KYB, financials, compliance & network graphs.
 
 ### Short description (≤ 300 chars)
-> Query 16+ European business registries through one MCP server. Ten tools cover
+> Query 23 European business registries through one MCP server. Ten tools cover
 > typo-tolerant company search, registry-ID lookup, full company profiles,
 > financials, AML/sanctions compliance, public-sector supplier contracts,
 > shared-officer network graphs and pre-computed rankings. Bring your own
@@ -109,7 +109,7 @@ entirely through (b).
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.juliusgerman/entyrix-mcp",
-  "description": "MCP server for the Entyrix European business-registry (KYB) API — search, lookup, financials, compliance and network graphs across 16+ EU jurisdictions.",
+  "description": "MCP server for the Entyrix European business-registry (KYB) API — search, lookup, financials, compliance and network graphs across 23 live European markets.",
   "repository": {
     "url": "https://github.com/juliusgerman/entyrix-mcp",
     "source": "github"
@@ -162,8 +162,8 @@ mcp-publisher publish
 **About / description (GitHub repo "About" field, ≤ 350 chars):**
 > MCP server for the Entyrix European business-registry (KYB) API. 10 stdio
 > tools — company search, registry-ID lookup, financials, AML/sanctions
-> compliance, supplier contracts and shared-officer network graphs across 16+
-> EU jurisdictions. Bring your own Entyrix API key.
+> compliance, supplier contracts and shared-officer network graphs across 23
+> live European markets. Bring your own Entyrix API key.
 
 **Website field:** https://entyrix.com
 
@@ -175,7 +175,7 @@ mcp-publisher publish
 
 ```bash
 gh repo create entyrix-mcp --public \
-  --description "MCP server for the Entyrix European business-registry (KYB) API — 10 tools across 16+ EU jurisdictions." \
+  --description "MCP server for the Entyrix European business-registry (KYB) API — 10 tools across 23 live European markets." \
   --homepage "https://entyrix.com" --source . --remote origin --push
 gh repo edit --add-topic mcp,model-context-protocol,kyb,company-data,business-intelligence,eu,business-registry,compliance,financials,claude,llm-tools
 ```
