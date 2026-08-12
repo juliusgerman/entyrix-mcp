@@ -46,10 +46,7 @@ export const advancedSearchInputSchema = {
    * answer to a question nobody asked. Declaring the alias removes the trap
    * instead of making it louder; the handler folds it into `country_code`.
    */
-  country: z
-    .string()
-    .optional()
-    .describe("Alias for country_code. ISO 3166-1 alpha-2, e.g. 'SK'."),
+  country: z.string().optional().describe("Alias for country_code. ISO 3166-1 alpha-2, e.g. 'SK'."),
   legal_form: z.string().optional().describe("Legal form code, e.g. '112' = s.r.o. (SK)"),
   entity_type: z
     .enum(["legal_entity", "self_employed", "npo", "public_body", "other"])

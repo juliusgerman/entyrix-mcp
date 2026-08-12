@@ -32,7 +32,11 @@ function harness() {
 
   let handler: ((args: Record<string, unknown>) => Promise<unknown>) | null = null;
   const server = {
-    registerTool: (_n: string, _c: unknown, h: (a: Record<string, unknown>) => Promise<unknown>) => {
+    registerTool: (
+      _n: string,
+      _c: unknown,
+      h: (a: Record<string, unknown>) => Promise<unknown>
+    ) => {
       handler = h;
     },
   } as never;
