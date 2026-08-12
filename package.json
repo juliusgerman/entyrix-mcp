@@ -1,6 +1,6 @@
 {
   "name": "@entyrix/mcp",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Model Context Protocol server for the Entyrix European business-registry (KYB) API. Exposes 10 stdio tools (search, lookup, details, network, relations, advanced search, compliance, financials, suppliers, rankings) for LLM clients (Claude Desktop, Claude Code, Cursor, ChatGPT).",
   "mcpName": "io.github.juliusgerman/entyrix-mcp",
   "type": "module",

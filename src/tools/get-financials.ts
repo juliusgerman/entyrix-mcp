@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { EntyrixClient } from "../lib/client.js";
+import { financialRowsToEur } from "../lib/money.js";
 
 export const getFinancialsInputSchema = {
   ico: z
@@ -21,7 +22,8 @@ export const getFinancialsInputSchema = {
 const description =
   "Return up to N most-recent annual financial statements (turnover, total " +
   "assets, equity, profit, EBITDA, ROA, ROE) for a company. Source: SK FS / " +
-  "CZ Justice / AT FBW depending on jurisdiction. All amounts in EUR. " +
+  "CZ Justice / AT FBW depending on jurisdiction. All money amounts are in " +
+  "EUR (each row carries `unit`); roa/roe are ratios. " +
   "Implemented as a thin extractor over get_company_details — saves the LLM " +
   "from parsing the full company envelope when only financials are needed.";
 
@@ -50,7 +52,7 @@ export function registerGetFinancials(server: McpServer, client: EntyrixClient):
       const allYears = Array.isArray(full.data?.latestFinancials)
         ? full.data!.latestFinancials!
         : [];
-      const truncated = allYears.slice(0, years);
+      const truncated = financialRowsToEur(allYears.slice(0, years));
       return {
         content: [
           {

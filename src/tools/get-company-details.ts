@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { EntyrixClient } from "../lib/client.js";
+import { financialRowsToEur } from "../lib/money.js";
 
 export const getCompanyDetailsInputSchema = {
   ico: z
@@ -30,6 +31,13 @@ export function registerGetCompanyDetails(server: McpServer, client: EntyrixClie
     async (args) => {
       const ico = args.ico.padStart(8, "0");
       const result = await client.get<unknown>(`/companies/${encodeURIComponent(ico)}`);
+      // `latestFinancials` arrives in cents — same rows `get_financials` serves.
+      // Converted here too, or the two tools would disagree about the same
+      // company depending on which one the model happened to call.
+      const envelope = result as { data?: { latestFinancials?: unknown } } | null;
+      if (envelope?.data && Array.isArray(envelope.data.latestFinancials)) {
+        envelope.data.latestFinancials = financialRowsToEur(envelope.data.latestFinancials);
+      }
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
       };
