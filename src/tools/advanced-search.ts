@@ -32,6 +32,24 @@ export const advancedSearchInputSchema = {
     .string()
     .optional()
     .describe("ISO 3166-1 alpha-2, comma-separated for several markets, e.g. 'SK,CZ'"),
+  /**
+   * Alias for `country_code`. Not redundancy — a trap remover.
+   *
+   * Every other tool on this server takes `country`; only this one takes
+   * `country_code`. Measured 2026-08-12 against a fresh build: calling
+   * `advanced_search({ country: "sk" })` returned FRENCH companies. Zod strips
+   * an undeclared key before the request is built, so the filter never reached
+   * the API — which means the API's own `unknownFilters` guard could not report
+   * it either, because the API never saw the key.
+   *
+   * That is the worst shape of wrong: a complete, plausible, default-sorted
+   * answer to a question nobody asked. Declaring the alias removes the trap
+   * instead of making it louder; the handler folds it into `country_code`.
+   */
+  country: z
+    .string()
+    .optional()
+    .describe("Alias for country_code. ISO 3166-1 alpha-2, e.g. 'SK'."),
   legal_form: z.string().optional().describe("Legal form code, e.g. '112' = s.r.o. (SK)"),
   entity_type: z
     .enum(["legal_entity", "self_employed", "npo", "public_body", "other"])
@@ -159,7 +177,14 @@ export function registerAdvancedSearch(server: McpServer, client: EntyrixClient)
       const query: Record<string, string | number | boolean | undefined> = {};
       for (const [k, v] of Object.entries(args)) {
         if (v === undefined) continue;
+        // `country` is the alias; the API only knows `country_code`. Sending
+        // both would put an unrecognised key on the wire and light up
+        // `unknownFilters` for something that is working as intended.
+        if (k === "country") continue;
         query[k] = v as string | number | boolean;
+      }
+      if (args.country !== undefined && query.country_code === undefined) {
+        query.country_code = args.country;
       }
       const result = await client.get<unknown>("/companies/advanced-search", query);
       return {
