@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import type { EntyrixClient } from "../lib/client.js";
+import { MARKET_COUNT, MARKET_LIST } from "../lib/coverage.js";
 
 export const searchCompaniesInputSchema = {
   q: z.string().min(1).max(200).describe("Search query (company name, partial name, address, IČO)"),
@@ -21,8 +22,8 @@ const description =
   "Powered by the autocomplete index for typo-tolerance + 12ms p95. " +
   "Returns ranked hits with IČO, name, address, NACE code, legal form, status, " +
   "and country. Use this for fuzzy 'find a company called …' queries before " +
-  "drilling into details with lookup_company or get_company_details. " +
-  "Coverage: SK, CZ, AT, EE, SI, LV, UK and growing.";
+  `drilling into details with lookup_company or get_company_details. ` +
+  `Coverage: ${MARKET_COUNT} live markets (${MARKET_LIST}).`;
 
 export function registerSearchCompanies(server: McpServer, client: EntyrixClient): void {
   server.registerTool(

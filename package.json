@@ -1,6 +1,6 @@
 {
   "name": "@entyrix/mcp",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Model Context Protocol server for the Entyrix European business-registry (KYB) API. Exposes 10 stdio tools (search, lookup, details, network, relations, advanced search, compliance, financials, suppliers, rankings) for LLM clients (Claude Desktop, Claude Code, Cursor, ChatGPT).",
   "mcpName": "io.github.juliusgerman/entyrix-mcp",
   "type": "module",
@@ -36,7 +36,8 @@
     "test:watch": "vitest",
     "prepublishOnly": "npm run build && npm test",
     "test:contract": "vitest run --config vitest.contract.config.ts",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "bundle": "bash scripts/bundle.sh"
   },
   "keywords": [
     "mcp",

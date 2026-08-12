@@ -1,0 +1,107 @@
+{
+  "manifest_version": "0.2",
+  "name": "entyrix-mcp",
+  "display_name": "Entyrix — European business registries",
+  "version": "0.1.2",
+  "description": "KYB data from 23 European business registries — search, financials, compliance, network graphs.",
+  "long_description": "Query 23 European business registries through one MCP server. Ten tools cover typo-tolerant company search, registry-ID lookup, full company profiles (financials, tech stack, NIS2, sanctions, credit grade), 57-key advanced filtering, multi-year financial statements, public-sector supplier contracts, shared-officer relation graphs and pre-computed rankings. Bring your own Entyrix API key from https://entyrix.com.",
+  "author": {
+    "name": "Entyrix",
+    "email": "info@entyrix.com",
+    "url": "https://entyrix.com"
+  },
+  "homepage": "https://entyrix.com",
+  "documentation": "https://entyrix.com/mcp",
+  "support": "https://github.com/juliusgerman/entyrix-mcp/issues",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/juliusgerman/entyrix-mcp"
+  },
+  "license": "MIT",
+  "keywords": [
+    "mcp",
+    "kyb",
+    "company-data",
+    "business-registry",
+    "eu",
+    "compliance",
+    "financials",
+    "business-intelligence"
+  ],
+  "server": {
+    "type": "node",
+    "entry_point": "dist/index.js",
+    "mcp_config": {
+      "command": "node",
+      "args": ["${__dirname}/dist/index.js"],
+      "env": {
+        "ENTYRIX_API_KEY": "${user_config.api_key}",
+        "ENTYRIX_BASE_URL": "${user_config.base_url}"
+      }
+    }
+  },
+  "user_config": {
+    "api_key": {
+      "type": "string",
+      "title": "Entyrix API key",
+      "description": "Bearer token from entyrix.com (dashboard → API keys)",
+      "sensitive": true,
+      "required": true
+    },
+    "base_url": {
+      "type": "string",
+      "title": "Base URL",
+      "description": "Override for staging or self-hosted Entyrix",
+      "default": "https://entyrix.com",
+      "required": false
+    }
+  },
+  "tools": [
+    {
+      "name": "search_companies",
+      "description": "Typo-tolerant search by company name, partial name or address across 23 markets."
+    },
+    {
+      "name": "lookup_company",
+      "description": "Resolve a registry ID (IČO / company number) to a company, country-aware."
+    },
+    {
+      "name": "get_company_details",
+      "description": "Full profile: registry data, financials, tech stack, security posture, NIS2, sanctions, credit grade."
+    },
+    {
+      "name": "get_company_network",
+      "description": "Shared-officer and ownership network graph around a company."
+    },
+    {
+      "name": "get_company_relations",
+      "description": "Direct relations: officers, parents, subsidiaries, beneficial owners."
+    },
+    {
+      "name": "advanced_search",
+      "description": "Structured filtering over the whole catalogue — 57 filter keys (country, NACE, size, financials, risk flags)."
+    },
+    {
+      "name": "check_compliance",
+      "description": "AML / sanctions / debarment screening plus NIS2 scope for a given company."
+    },
+    {
+      "name": "get_financials",
+      "description": "Multi-year financial statements: revenue, profit, assets, equity, employees."
+    },
+    {
+      "name": "find_suppliers",
+      "description": "Public-sector contracts a company has won, as supplier or as contracting authority."
+    },
+    {
+      "name": "list_rankings",
+      "description": "Pre-computed leaderboards by turnover, employees, contracts or credit grade."
+    }
+  ],
+  "compatibility": {
+    "platforms": ["darwin", "win32", "linux"],
+    "runtimes": {
+      "node": ">=18.0.0"
+    }
+  }
+}

@@ -40,7 +40,7 @@ Publish `@entyrix/mcp` to npm first (that is the canonical distribution the dire
 > profiles (financials, tech stack, security posture, NIS2, sanctions, credit
 > grade), 57-key advanced filtering, multi-year financial statements,
 > public-sector supplier contracts, shared-officer / UBO relation graphs, and
-> pre-computed leaderboards — across SK, CZ, AT, EE, SI, LV, UK and more.
+> pre-computed leaderboards — across 23 live European markets.
 > Configure with a single `ENTYRIX_API_KEY`. Runs locally over stdio.
 
 ---

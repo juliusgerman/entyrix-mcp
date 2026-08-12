@@ -13,4 +13,4 @@
  * `__tests__/version.test.ts`, which asserts this equals package.json and both
  * version fields in server.json — a bump that misses one goes red.
  */
-export const VERSION = "0.1.1";
+export const VERSION = "0.1.2";

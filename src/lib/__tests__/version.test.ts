@@ -38,6 +38,15 @@ describe("VERSION", () => {
     for (const p of s.packages) expect(p.version).toBe(VERSION);
   });
 
+  it("matches the MCPB manifest", () => {
+    // Third manifest repeating the same string. `scripts/bundle.sh` refuses to
+    // build on a mismatch, but that check only fires when someone runs the
+    // bundle — which is once per release at best. A bundle whose manifest
+    // claims a different version than the code inside it installs cleanly and
+    // reports the wrong build forever.
+    expect(read("manifest.json").version).toBe(VERSION);
+  });
+
   it("server.json points at the package this repo actually publishes", () => {
     const s = read("server.json") as { packages: Array<{ identifier: string }> };
     const pkg = read("package.json") as { name: string };
