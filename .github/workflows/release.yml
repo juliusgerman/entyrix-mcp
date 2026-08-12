@@ -93,22 +93,6 @@ jobs:
             || gh release upload "$GITHUB_REF_NAME" \
                  "build/entyrix-mcp-${GITHUB_REF_NAME#v}.mcpb" --clobber
 
-      # Last on purpose: npm and the registry are the surfaces that matter, and
-      # they are already done by this point. A failure here goes red and names
-      # itself rather than being swallowed — a skipped publish that reports
-      # success is how a directory listing silently rots.
-      - name: publish the bundle to Smithery
-        env:
-          SMITHERY_API_KEY: ${{ secrets.SMITHERY_API_KEY }}
-        run: |
-          if [ -z "$SMITHERY_API_KEY" ]; then
-            echo "::error::SMITHERY_API_KEY is not set — the bundle was built but not published"
-            exit 1
-          fi
-          npx -y @smithery/cli@latest mcp publish \
-            "build/entyrix-mcp-${GITHUB_REF_NAME#v}.mcpb" \
-            -n entyrix/entyrix-mcp
-
   alert:
     needs: [release]
     if: failure()
