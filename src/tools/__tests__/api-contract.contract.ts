@@ -39,6 +39,7 @@ import {
   setupMockAgent,
   teardownMockAgent,
   getMockPool,
+  mockableFetch,
   TEST_BASE_URL,
   type CapturedTool,
 } from "./_harness.js";
@@ -268,9 +269,12 @@ describe("MCP tools against the published API spec", () => {
 // undici's MockAgent does not expose the requested URL after the fact, so we
 // wrap fetch for the duration of the run.
 const fetchedUrls: string[] = [];
-const realFetch = globalThis.fetch;
 globalThis.fetch = ((input: RequestInfo | URL, init?: RequestInit) => {
   const url = typeof input === "string" ? input : input instanceof URL ? input.href : input.url;
   if (url.startsWith(TEST_BASE_URL)) fetchedUrls.push(url);
-  return realFetch(input as never, init as never);
+  // `mockableFetch`, not the captured native one: from Node 26 the built-in
+  // fetch reads a different global dispatcher than the userland `undici`
+  // package sets, so delegating to it would bypass MockAgent entirely and this
+  // suite would try to reach entyrix.test over the real network.
+  return mockableFetch(input as never, init as never);
 }) as typeof fetch;

@@ -52,6 +52,18 @@ let originalDispatcher: Dispatcher | null = null;
 let originalFetch: typeof globalThis.fetch | null = null;
 let agent: MockAgent | null = null;
 
+/**
+ * The `fetch` whose dispatcher `setGlobalDispatcher` actually controls.
+ *
+ * Anything that wraps `globalThis.fetch` (the contract suite spies on it to
+ * record request URLs) must DELEGATE to this rather than to the native fetch it
+ * captured, or the mock never sees the call.
+ */
+export const mockableFetch = undiciFetch as unknown as typeof globalThis.fetch;
+
+/** What `globalThis.fetch` was when this module loaded — see setupMockAgent. */
+const fetchAtLoad = globalThis.fetch;
+
 export function setupMockAgent(): MockAgent {
   originalDispatcher = getGlobalDispatcher();
   agent = new MockAgent();
@@ -64,8 +76,17 @@ export function setupMockAgent(): MockAgent {
   // `fetch failed` (a real DNS lookup for entyrix.test). `disableNetConnect`
   // could not save it either, for the same reason. Point `fetch` at the copy
   // whose dispatcher we actually control, for the duration of the mock.
-  originalFetch = globalThis.fetch;
-  globalThis.fetch = undiciFetch as unknown as typeof globalThis.fetch;
+  //
+  // Only when nothing else has taken it over. The contract suite installs its
+  // own recording wrapper at module load — replacing that wrapper here would
+  // orphan it, every tool would look like it "issued no request", and the
+  // contract check would fail while claiming the tools are broken. That is
+  // exactly what happened on CI run 33854850899. Wrappers delegate to
+  // `mockableFetch`, so leaving one in place still reaches the mock.
+  if (globalThis.fetch === fetchAtLoad) {
+    originalFetch = globalThis.fetch;
+    globalThis.fetch = mockableFetch;
+  }
   return agent;
 }
 
