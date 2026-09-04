@@ -39,4 +39,26 @@ describe("check_compliance tool", () => {
     const body = JSON.parse(out.content[0].text);
     expect(body.data.rpvs_listed).toBe(true);
   });
+
+  it("tells the model that null means withheld, not cleared", () => {
+    // The description is the whole contract with the caller here. This tool is
+    // the PUBLIC tier: for a natural person the API withholds the address, the
+    // tax IDs and the entire compliance assessment. Until 2026-09-04 the API
+    // published `tier: "STANDARD"` and `isSanctioned: false` for those subjects
+    // — the cleanest possible verdict about someone it never assessed — and a
+    // model reading this tool had nothing to warn it. Both halves are fixed;
+    // this pins the half that lives in the kit, because a future rewrite of the
+    // blurb for brevity would silently take the warning out again.
+    const client = new EntyrixClient({ apiKey: "k", baseUrl: TEST_BASE_URL });
+    const { server, tools } = createCaptureServer();
+    registerCheckCompliance(server as any, client);
+    const { description } = tools.get("check_compliance")!;
+
+    expect(description).toMatch(/withheld/i);
+    expect(description).toMatch(/null/i);
+    expect(description).toMatch(/redaction\.applied/);
+    // And it must point at the surface that does have the answer, otherwise
+    // "we won't tell you" is the end of the road for the caller.
+    expect(description).toMatch(/get_company_details/);
+  });
 });

@@ -21,7 +21,16 @@ const description =
   "(transparency-of-ownership register, zákon 315/2016), and active " +
   "regulatory flags. No API key required server-side (public route), but " +
   "still routed through the authenticated MCP client for traceability. " +
-  "SK-only today; CZ/AT compliance modules tracked in roadmap.";
+  "SK-only today; CZ/AT compliance modules tracked in roadmap. " +
+  "IMPORTANT — this is the PUBLIC tier and it answers about natural persons " +
+  "(sole traders) with `null`, meaning WITHHELD, never 'no finding'. When " +
+  "`redaction.applied` is true the address, tax IDs and the whole compliance " +
+  "assessment (`tier`, `activeFlagCount`, the flags named in `withheldFlags`) " +
+  "were not published, and the subject must NOT be reported as clear, " +
+  "unsanctioned or debt-free. Use get_company_details for the assessed values; " +
+  "it reads the authenticated surface, where an FO-enabled key returns them. " +
+  "That is also why the two tools can disagree about the same subject: they " +
+  "are different trust tiers, not different data.";
 
 export function registerCheckCompliance(server: McpServer, client: EntyrixClient): void {
   server.registerTool(
