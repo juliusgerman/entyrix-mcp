@@ -5,18 +5,33 @@ on:
     branches: [main]
   pull_request:
 
-# Single job on purpose: GitHub bills every job rounded up to a whole minute,
-# so five ten-second jobs cost more than one two-minute job. Every step carries
-# `if: always()` so a red format check cannot hide a red test — splitting for
-# isolation and then letting the first failure mask the rest would buy nothing.
+# One job per Node version, and no finer. GitHub bills every job rounded up to
+# a whole minute, so five ten-second jobs cost more than one two-minute job.
+# Every step carries `if: always()` so a red format check cannot hide a red
+# test — splitting for isolation and then letting the first failure mask the
+# rest would buy nothing.
+#
+# The second Node version is not symmetry, it is the one axis that was measured
+# blind. 22 is the publish baseline (release.yml pins it); development happens
+# on 26, and on 2026-09-04 the whole suite was dead there — 15 tests failing on
+# real DNS, because Node carries its own undici copy and `globalThis.fetch`
+# reads THAT copy's dispatcher, not the one userland `undici@6` sets. CI was
+# green the entire time, on the version nobody develops against.
+#
+# `fail-fast: false` is load-bearing for the same reason every step has
+# `if: always()`: a red on 22 must not cancel 26 and take the answer with it.
 jobs:
   check:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [22, 26]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: ${{ matrix.node-version }}
           cache: npm
       - run: npm ci
 
