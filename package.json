@@ -1,7 +1,7 @@
 {
   "name": "@entyrix/mcp",
-  "version": "0.1.4",
-  "description": "Model Context Protocol server for the Entyrix European business-registry (KYB) API. Exposes 10 stdio tools (search, lookup, details, network, relations, advanced search, compliance, financials, suppliers, rankings) for LLM clients (Claude Desktop, Claude Code, Cursor, ChatGPT).",
+  "version": "0.2.0",
+  "description": "Model Context Protocol stdio bridge for Entyrix, the European business-registry (KYB) data platform. Forwards to the remote server https://entyrix.com/mcp/v1 (company search, briefs, financials, ownership, KYB/AML screening across 23 European registries) for clients without remote-MCP support. Zero runtime dependencies.",
   "mcpName": "io.github.juliusgerman/entyrix-mcp",
   "type": "module",
   "bin": {
@@ -58,10 +58,7 @@
   "engines": {
     "node": ">=22"
   },
-  "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.29.0",
-    "zod": "^3.25.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/node": "^22.10.0",
     "@typescript-eslint/eslint-plugin": "^8.18.0",
@@ -69,7 +66,6 @@
     "eslint": "^8.57.1",
     "prettier": "^3.4.0",
     "typescript": "^5.7.0",
-    "undici": "^6.21.0",
     "vitest": "^4.1.10"
   }
 }

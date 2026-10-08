@@ -1,25 +1,25 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.juliusgerman/entyrix-mcp",
-  "description": "KYB data from 23 European business registries — search, financials, compliance, network graphs",
+  "description": "KYB data from 23 European business registries — company briefs, financials, ownership, AML screening",
   "repository": {
     "url": "https://github.com/juliusgerman/entyrix-mcp",
     "source": "github"
   },
-  "version": "0.1.4",
+  "version": "0.2.0",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@entyrix/mcp",
-      "version": "0.1.4",
+      "version": "0.2.0",
       "transport": {
         "type": "stdio"
       },
       "environmentVariables": [
         {
           "name": "ENTYRIX_API_KEY",
-          "description": "Bearer token from https://entyrix.com",
-          "isRequired": true,
+          "description": "Bearer API key from https://entyrix.com (without it only discovery and public tools work)",
+          "isRequired": false,
           "isSecret": true
         },
         {
@@ -28,6 +28,12 @@
           "isRequired": false
         }
       ]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://entyrix.com/mcp/v1"
     }
   ]
 }

@@ -2,9 +2,9 @@
   "manifest_version": "0.2",
   "name": "entyrix-mcp",
   "display_name": "Entyrix — European business registries",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "KYB data from 23 European business registries — search, financials, compliance, network graphs.",
-  "long_description": "Query 23 European business registries through one MCP server. Ten tools cover typo-tolerant company search, registry-ID lookup, full company profiles (financials, tech stack, NIS2, sanctions, credit grade), 57-key advanced filtering, multi-year financial statements, public-sector supplier contracts, shared-officer relation graphs and pre-computed rankings. Bring your own Entyrix API key from https://entyrix.com.",
+  "long_description": "Query 23 European business registries through one MCP server. This bundle is a thin bridge to the remote Entyrix server (https://entyrix.com/mcp/v1), so it always exposes the current tool catalogue: company search, registry-ID lookup, LLM-ready company briefs, full records, financial statements by year, ownership network and relations, paged market filtering, one-call KYB/AML checks, screening of up to 25 companies, public compliance snapshots, public-sector contracts and rankings. Bring your own Entyrix API key from https://entyrix.com.",
   "author": {
     "name": "Entyrix",
     "email": "info@entyrix.com",
@@ -46,9 +46,9 @@
     "api_key": {
       "type": "string",
       "title": "Entyrix API key",
-      "description": "Bearer token from entyrix.com (dashboard → API keys)",
+      "description": "Bearer token from entyrix.com (account → API keys). Without it only discovery and public tools work.",
       "sensitive": true,
-      "required": true
+      "required": false
     },
     "base_url": {
       "type": "string",
@@ -61,43 +61,55 @@
   "tools": [
     {
       "name": "search_companies",
-      "description": "Typo-tolerant search by company name, partial name or address across 23 markets."
+      "description": "Find companies by name across 23 markets."
     },
     {
       "name": "lookup_company",
-      "description": "Resolve a registry ID (IČO / company number) to a company, country-aware."
+      "description": "Exact registry-ID lookup, country-scoped."
+    },
+    {
+      "name": "company_brief",
+      "description": "Compact Markdown brief of one company — the best single call."
     },
     {
       "name": "get_company_details",
-      "description": "Full profile: registry data, financials, tech stack, security posture, NIS2, sanctions, credit grade."
-    },
-    {
-      "name": "get_company_network",
-      "description": "Shared-officer and ownership network graph around a company."
-    },
-    {
-      "name": "get_company_relations",
-      "description": "Direct relations: officers, parents, subsidiaries, beneficial owners."
-    },
-    {
-      "name": "advanced_search",
-      "description": "Structured filtering over the whole catalogue — 57 filter keys (country, NACE, size, financials, risk flags)."
-    },
-    {
-      "name": "check_compliance",
-      "description": "AML / sanctions / debarment screening plus NIS2 scope for a given company."
+      "description": "Full record including the enrichment layer."
     },
     {
       "name": "get_financials",
-      "description": "Multi-year financial statements: revenue, profit, assets, equity, employees."
+      "description": "Financial statements by year with trend (EUR cents)."
+    },
+    {
+      "name": "get_company_network",
+      "description": "Companies connected through shared officers and owners."
+    },
+    {
+      "name": "get_company_relations",
+      "description": "Officers, owners, parents, subsidiaries, M&A events."
+    },
+    {
+      "name": "advanced_search",
+      "description": "Paged filtering by country, NACE, size, turnover, status."
+    },
+    {
+      "name": "kyb_check",
+      "description": "One-call KYB/AML summary with a verdict."
+    },
+    {
+      "name": "screen_companies",
+      "description": "KYB screening of up to 25 companies at once."
+    },
+    {
+      "name": "check_compliance",
+      "description": "Public compliance snapshot (no account needed)."
     },
     {
       "name": "find_suppliers",
-      "description": "Public-sector contracts a company has won, as supplier or as contracting authority."
+      "description": "Public-sector contracts (B2G, not a supply chain)."
     },
     {
       "name": "list_rankings",
-      "description": "Pre-computed leaderboards by turnover, employees, contracts or credit grade."
+      "description": "Pre-computed leaderboards."
     }
   ],
   "compatibility": {
@@ -107,7 +119,7 @@
       "linux"
     ],
     "runtimes": {
-      "node": ">=18.0.0"
+      "node": ">=22.0.0"
     }
   }
 }
