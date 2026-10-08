@@ -2,7 +2,7 @@
   "manifest_version": "0.2",
   "name": "entyrix-mcp",
   "display_name": "Entyrix — European business registries",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "KYB data from 23 European business registries — search, financials, compliance, network graphs.",
   "long_description": "Query 23 European business registries through one MCP server. This bundle is a thin bridge to the remote Entyrix server (https://entyrix.com/mcp/v1), so it always exposes the current tool catalogue: company search, registry-ID lookup, LLM-ready company briefs, full records, financial statements by year, ownership network and relations, paged market filtering, one-call KYB/AML checks, screening of up to 25 companies, public compliance snapshots, public-sector contracts and rankings. Bring your own Entyrix API key from https://entyrix.com.",
   "author": {

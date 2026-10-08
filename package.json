@@ -1,6 +1,6 @@
 {
   "name": "@entyrix/mcp",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Model Context Protocol stdio bridge for Entyrix, the European business-registry (KYB) data platform. Forwards to the remote server https://entyrix.com/mcp/v1 (company search, briefs, financials, ownership, KYB/AML screening across 23 European registries) for clients without remote-MCP support. Zero runtime dependencies.",
   "mcpName": "io.github.juliusgerman/entyrix-mcp",
   "type": "module",

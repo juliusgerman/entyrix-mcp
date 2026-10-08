@@ -2,160 +2,75 @@
 
 [![npm](https://img.shields.io/npm/v/@entyrix/mcp)](https://www.npmjs.com/package/@entyrix/mcp)
 
+Model Context Protocol access to [Entyrix](https://entyrix.com) — European business-registry (KYB) data across 23 live markets (FR, GB, RO, SK, UA, GR, CZ, BE, NO, IE, FI, CH, PL, AT, CY, LT, LV, EE, SI, ES, IT, NL, HR).
 
-Model Context Protocol (MCP) server for the [Entyrix](https://entyrix.com) European business-registry (KYB) API. Exposes 10 stdio tools so LLM clients (Claude Desktop, Claude Code, Cursor, ChatGPT) can search, look up, and analyze companies across 23 live markets (FR, GB, RO, SK, UA, GR, CZ, BE, NO, IE, FI, CH, PL, AT, CY, LT, LV, EE, SI, ES, IT, NL, HR).
+## Use the remote server (recommended)
 
-## 30-second quickstart
+Entyrix runs a remote MCP server (Streamable HTTP, protocol 2025-03-26 … 2026-07-28):
 
-```bash
-npm install -g @entyrix/mcp
-export ENTYRIX_API_KEY=your-api-key-here
-entyrix-mcp
+```
+https://entyrix.com/mcp/v1
 ```
 
-Or run without installing:
+Add it as a remote / custom connector in Claude, ChatGPT, Cursor or VS Code. On the first tool call your client opens the Entyrix sign-in (OAuth 2.1 with PKCE) — no key in a config file. From the command line:
 
 ```bash
-export ENTYRIX_API_KEY=your-api-key-here
-npx @entyrix/mcp
+claude mcp add --transport http entyrix https://entyrix.com/mcp/v1
 ```
 
-Get an API key at <https://entyrix.com>.
+Full instructions: <https://entyrix.com/mcp>.
+
+## This package: a stdio bridge
+
+For clients that only speak stdio. Since **0.2.0** the package implements no tools itself — it forwards every JSON-RPC message to the remote server above with your API key from the environment, so it always exposes exactly the current catalogue. It has **zero runtime dependencies**.
+
+```bash
+ENTYRIX_API_KEY=sk_... npx -y @entyrix/mcp
+```
+
+```json
+{
+  "mcpServers": {
+    "entyrix": {
+      "command": "npx",
+      "args": ["-y", "@entyrix/mcp"],
+      "env": { "ENTYRIX_API_KEY": "sk_..." }
+    }
+  }
+}
+```
+
+Get an API key at <https://entyrix.com>. Without a key, discovery and the public tools work; data tools answer with a request to set `ENTYRIX_API_KEY`.
+
+**Pin the version** in production (e.g. `@entyrix/mcp@0.2.1`, not `latest`): a local MCP server runs with your privileges, and an unpinned `npx -y` installs whatever is published next.
 
 ## Tools
 
-| Tool | Description |
+| Tool | What it does |
 |---|---|
-| `search_companies` | Fuzzy/typo-tolerant name search (server-side 26-62 ms cold, ~1 ms cached; measured 2026-08-11) |
-| `lookup_company` | Resolve a company by national registry ID, country-aware (SK/CZ/AT/EE/SI/LV/…) |
-| `get_company_details` | Full profile: financials, tech stack, security, NIS2, sanctions, credit grade |
-| `get_company_network` | Shared-officer graph — related entities via common directors/officers |
-| `get_company_relations` | Directors, UBO / beneficial owners, M&A and succession links |
-| `advanced_search` | 57-key filter search (country, NACE, turnover, credit grade, NIS2, sanctions, tech, …) |
-| `check_compliance` | AML / sanctions / debtor lists / RPVS check (SK) |
-| `get_financials` | Last N years of turnover, profit, EBITDA, ROA, ROE |
-| `find_suppliers` | Public-sector contracts where company is supplier (SK CRZ) |
-| `list_rankings` | Pre-computed leaderboards (top turnover, top employers, …) |
+| `search_companies` | Find companies by name across all markets |
+| `lookup_company` | Exact registry-ID lookup, country-scoped |
+| `company_brief` | Compact Markdown brief of one company — the best single call |
+| `get_company_details` | Full record including the enrichment layer |
+| `get_financials` | Financial statements by year with trend (EUR cents) |
+| `get_company_network` | Companies connected through shared officers and owners |
+| `get_company_relations` | Officers, owners, parents, subsidiaries, M&A events |
+| `advanced_search` | Paged filtering by country, NACE, size, turnover, status |
+| `kyb_check` | One-call KYB/AML summary with a verdict |
+| `screen_companies` | KYB screening of up to 25 companies at once |
+| `check_compliance` | Public compliance snapshot (no account needed) |
+| `find_suppliers` | Public-sector contracts (B2G, not a supply chain) |
+| `list_rankings` | Pre-computed leaderboards |
+
+Every tool is read-only, declares an output schema and rejects unknown arguments. Natural-person data is licence-gated server-side and applies identically over MCP. Returned values come from public registers — treat them as untrusted data in your agent, never as instructions.
 
 ## Configuration
 
 | Env var | Default | Description |
 |---|---|---|
-| `ENTYRIX_API_KEY` | *(required)* | Bearer token from your Entyrix dashboard |
-| `ENTYRIX_BASE_URL` | `https://entyrix.com` | Override for staging / self-hosted |
-| `ENTYRIX_TIMEOUT_MS` | `30000` | HTTP timeout per request |
-
-## Client setup
-
-### Claude Desktop
-
-Edit `~/Library/Application Support/Claude/claude_desktop_config.json` (macOS) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows):
-
-```json
-{
-  "mcpServers": {
-    "entyrix": {
-      "command": "npx",
-      "args": ["-y", "@entyrix/mcp"],
-      "env": {
-        "ENTYRIX_API_KEY": "your-api-key-here"
-      }
-    }
-  }
-}
-```
-
-Restart Claude Desktop. The 10 tools appear in the tools panel.
-
-### Claude Code
-
-Register the server from any project (writes to `~/.claude.json`):
-
-```bash
-claude mcp add entyrix --env ENTYRIX_API_KEY=your-api-key-here -- npx -y @entyrix/mcp
-```
-
-Or add it manually to `.mcp.json` in your project root (checked in) / `~/.claude.json` (global):
-
-```json
-{
-  "mcpServers": {
-    "entyrix": {
-      "command": "npx",
-      "args": ["-y", "@entyrix/mcp"],
-      "env": {
-        "ENTYRIX_API_KEY": "your-api-key-here"
-      }
-    }
-  }
-}
-```
-
-### Cursor
-
-Edit `.cursor/mcp.json` in your workspace (or `~/.cursor/mcp.json` for global):
-
-```json
-{
-  "mcpServers": {
-    "entyrix": {
-      "command": "npx",
-      "args": ["-y", "@entyrix/mcp"],
-      "env": {
-        "ENTYRIX_API_KEY": "your-api-key-here"
-      }
-    }
-  }
-}
-```
-
-### ChatGPT
-
-ChatGPT does not consume MCP stdio servers directly today. Two integration paths:
-
-**1. Custom GPT Actions** — expose Entyrix endpoints as OpenAPI actions. Sketch:
-
-```yaml
-openapi: 3.1.0
-info:
-  title: Entyrix
-  version: 0.1.0
-servers:
-  - url: https://entyrix.com/api/v1
-paths:
-  /companies/autocomplete:
-    get:
-      operationId: searchCompanies
-      parameters:
-        - name: q
-          in: query
-          required: true
-          schema: { type: string }
-        - name: country
-          in: query
-          schema: { type: string, minLength: 2, maxLength: 2 }
-      responses:
-        "200": { description: OK }
-  /companies/{country}/{national_id}:
-    get:
-      operationId: lookupCompany
-      parameters:
-        - { name: country, in: path, required: true, schema: { type: string } }
-        - { name: national_id, in: path, required: true, schema: { type: string } }
-      responses:
-        "200": { description: OK }
-components:
-  securitySchemes:
-    BearerAuth:
-      type: http
-      scheme: bearer
-security:
-  - BearerAuth: []
-```
-
-Paste this into the Custom GPT builder, set the auth header, and the Entyrix endpoints become first-class GPT actions.
-
-**2. Connectors API (enterprise)** — `<https://platform.openai.com/docs/connectors>` accepts MCP servers behind an HTTP wrapper; a small HTTP-to-stdio adapter is on the roadmap.
+| `ENTYRIX_API_KEY` | *(none)* | Bearer API key from your Entyrix account |
+| `ENTYRIX_BASE_URL` | `https://entyrix.com` | Override for staging |
+| `ENTYRIX_TIMEOUT_MS` | `60000` | HTTP timeout per request |
 
 ## Development
 
@@ -167,12 +82,13 @@ npm run build
 npm test
 ```
 
-Local stdio sanity-check (requires a real API key):
+Local stdio sanity-check:
 
 ```bash
-ENTYRIX_API_KEY=your-key node dist/index.js
-# (stdin/stdout speaks MCP — wire it to a client to actually issue calls)
+printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' | node dist/index.js
 ```
+
+`npm run test:contract` runs the bridge against the live server (no secret needed).
 
 ### Quality gates
 
@@ -187,10 +103,10 @@ step that got skipped because it was being remembered rather than scripted.
 ### Releasing
 
 ```bash
-npm run bump 0.1.5          # writes all four manifests, refuses on drift
+npm run bump 0.2.2          # writes all four manifests, refuses on drift
 npm run check
-git commit -am "chore(release): 0.1.5"
-git tag v0.1.5
+git commit -am "chore(release): 0.2.2"
+git tag v0.2.2
 git push && git push --tags   # one push, then the tag
 ```
 
@@ -202,7 +118,9 @@ bills four of them (plus two red ones for the intermediate states).
 `npm publish` runs from the tag via OIDC trusted publishing, so no token is
 involved. npm versions are immutable: a bad publish cannot be recalled, only
 superseded — which is why the tag is checked against `package.json` before
-anything is published.
+anything is published. The release is idempotent: a re-run skips an npm
+version that already exists and waits for npm to serve it before registering
+with the MCP Registry.
 
 ## License
 

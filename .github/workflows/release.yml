@@ -64,8 +64,17 @@ jobs:
       - name: API contract (live spec)
         run: npm run test:contract
 
+      # Idempotent: a re-run after a later step failed must not die here on
+      # "cannot publish over an existing version" — that turned the 0.2.0
+      # registry failure (npm not yet propagated) into an unrecoverable run.
       - name: publish to npm
-        run: npm publish --access public
+        run: |
+          VER="$(node -p "require('./package.json').version")"
+          if npm view "@entyrix/mcp@$VER" version >/dev/null 2>&1; then
+            echo "@entyrix/mcp@$VER already on npm — skipping publish"
+          else
+            npm publish --access public
+          fi
 
       # The registry validates the npm tarball, so it MUST come after the npm
       # publish — reversed, it 4xxs on a version that does not exist yet.
@@ -77,6 +86,14 @@ jobs:
             https://github.com/modelcontextprotocol/registry/releases/download/v1.8.1/mcp-publisher_linux_amd64.tar.gz
           tar xzf mcp-publisher.tar.gz mcp-publisher
           ./mcp-publisher login github-oidc
+          # The registry validates the npm tarball and 404s until npm has
+          # propagated the new version (0.2.0 failed exactly here, ~1 min after
+          # a successful npm publish). Wait for it, bounded.
+          VER="$(node -p "require('./package.json').version")"
+          for i in $(seq 1 30); do
+            npm view "@entyrix/mcp@$VER" version >/dev/null 2>&1 && break
+            echo "waiting for npm to serve $VER ($i/30)"; sleep 10
+          done
           ./mcp-publisher publish
 
       - name: build the MCPB bundle
