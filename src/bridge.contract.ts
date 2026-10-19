@@ -63,6 +63,8 @@ describe("bridge ↔ live server", () => {
         )
       )[0]!
     );
-    expect(out.error.message).toMatch(/ENTYRIX_API_KEY/);
+    expect(out.result.isError).toBe(true);
+    expect(out.result.content[0].text).toMatch(/ENTYRIX_API_KEY/);
+    expect(out.result.content[0].text).toMatch(/\/api\/v1\/signup/);
   });
 });
