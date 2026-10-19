@@ -40,9 +40,9 @@ ENTYRIX_API_KEY=sk_... npx -y @entyrix/mcp
 }
 ```
 
-Get an API key at <https://entyrix.com>. Without a key, discovery and the public tools work; data tools answer with a request to set `ENTYRIX_API_KEY`.
+Get an API key by signing in at <https://entyrix.com/login> (a Free key comes with the account) or through the API (`POST /api/v1/signup`, then `POST /api/v1/signup/verify`). Without a key the server still starts and lists its tools; the first data tool call answers with these steps as an error result. Plans: <https://entyrix.com/pricing>.
 
-**Pin the version** in production (e.g. `@entyrix/mcp@0.2.1`, not `latest`): a local MCP server runs with your privileges, and an unpinned `npx -y` installs whatever is published next.
+**Pin the version** in production (e.g. `@entyrix/mcp@0.2.2`, not `latest`): a local MCP server runs with your privileges, and an unpinned `npx -y` installs whatever is published next.
 
 ## Tools
 

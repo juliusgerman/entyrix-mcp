@@ -6,12 +6,12 @@
     "url": "https://github.com/juliusgerman/entyrix-mcp",
     "source": "github"
   },
-  "version": "0.2.1",
+  "version": "0.2.2",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@entyrix/mcp",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "transport": {
         "type": "stdio"
       },
@@ -33,7 +33,7 @@
   "remotes": [
     {
       "type": "streamable-http",
-      "url": "https://entyrix.com/mcp/v1"
+      "url": "https://entyrix.com/mcp"
     }
   ]
 }

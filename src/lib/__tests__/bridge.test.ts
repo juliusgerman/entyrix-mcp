@@ -107,34 +107,96 @@ describe("Bridge", () => {
     ).toEqual([]);
   });
 
-  it("401 without a key tells the user to set ENTYRIX_API_KEY; with a key, that it was rejected", async () => {
-    const f = fakeFetch((b) => ({
-      status: 401,
-      body: {
-        jsonrpc: "2.0",
-        id: b.id,
-        error: { code: -32001, message: "Authentication required" },
-      },
-    }));
-    const noKey = await new Bridge(cfg(undefined), f.impl).handleLine(
-      JSON.stringify({
-        jsonrpc: "2.0",
-        id: 1,
-        method: "tools/call",
-        params: { name: "lookup_company" },
-      })
-    );
+  const call = (id: number, name = "lookup_company") =>
+    JSON.stringify({ jsonrpc: "2.0", id, method: "tools/call", params: { name } });
+  const reject = (status: number, error: Record<string, unknown>) =>
+    fakeFetch((b) => ({ status, body: { jsonrpc: "2.0", id: b.id, error } }));
+
+  it("401 on a tool call without a key becomes an isError result with the sign-up steps and the server offer", async () => {
+    const offer = { get_access: { signup: "https://entyrix.com/login" } };
+    const f = reject(401, { code: -32001, message: "Authentication required", data: offer });
+    const out = JSON.parse((await new Bridge(cfg(undefined), f.impl).handleLine(call(1)))[0]!);
     expect(f.sent[0]!.headers.authorization).toBeUndefined();
-    expect(JSON.parse(noKey[0]!).error.message).toMatch(/Set ENTYRIX_API_KEY/);
-    const bad = await new Bridge(cfg("sk_bad"), f.impl).handleLine(
-      JSON.stringify({
-        jsonrpc: "2.0",
-        id: 2,
-        method: "tools/call",
-        params: { name: "lookup_company" },
-      })
+    expect(out.error).toBeUndefined();
+    expect(out.result.isError).toBe(true);
+    const text = out.result.content.map((c: { text: string }) => c.text).join("\n");
+    expect(text).toMatch(/ENTYRIX_API_KEY is not set/);
+    expect(text).toContain("https://entyrix.test/login");
+    expect(text).toContain("POST https://entyrix.test/api/v1/signup ");
+    expect(text).toContain("POST https://entyrix.test/api/v1/signup/verify");
+    expect(text).toContain("https://entyrix.test/mcp");
+    expect(text).toContain("https://entyrix.test/pricing");
+    expect(text).not.toContain("api-signup");
+    expect(text).toContain(JSON.stringify(offer));
+  });
+
+  it("401 with a rejected key says so; non-tool methods keep a JSON-RPC error", async () => {
+    const f = reject(401, { code: -32001, message: "Authentication required" });
+    const bad = JSON.parse((await new Bridge(cfg("sk_bad"), f.impl).handleLine(call(2)))[0]!);
+    expect(bad.result.isError).toBe(true);
+    expect(bad.result.content[0].text).toMatch(/rejected/);
+    const list = JSON.parse(
+      (
+        await new Bridge(cfg(undefined), f.impl).handleLine(
+          JSON.stringify({ jsonrpc: "2.0", id: 3, method: "tools/list" })
+        )
+      )[0]!
     );
-    expect(JSON.parse(bad[0]!).error.message).toMatch(/rejected/);
+    expect(list.error.message).toMatch(/ENTYRIX_API_KEY is not set/);
+  });
+
+  it.each([402, 403, 429])(
+    "%i on a tool call repeats message and upgrade offer",
+    async (status) => {
+      const f = reject(status, {
+        code: -32002,
+        message: "Plan required",
+        data: {
+          message: "Upgrade to Pro for this route.",
+          upgrade: { pricing: "https://x/pricing" },
+        },
+      });
+      const out = JSON.parse((await new Bridge(cfg("k"), f.impl).handleLine(call(4)))[0]!);
+      expect(out.result.isError).toBe(true);
+      const text = out.result.content[0].text as string;
+      expect(text).toContain("Plan required");
+      expect(text).toContain("Upgrade to Pro for this route.");
+      expect(text).toContain('"pricing":"https://x/pricing"');
+      expect(text).not.toContain("get_access_status");
+    }
+  );
+
+  it("mentions get_access_status only after tools/list offers it", async () => {
+    let listed: string[] = [];
+    const f = fakeFetch((b) =>
+      b.method === "tools/list"
+        ? {
+            status: 200,
+            body: { jsonrpc: "2.0", id: b.id, result: { tools: listed.map((name) => ({ name })) } },
+          }
+        : {
+            status: 429,
+            body: { jsonrpc: "2.0", id: b.id, error: { code: -32003, message: "Quota used" } },
+          }
+    );
+    const br = new Bridge(cfg("k"), f.impl);
+    const text = async (id: number) =>
+      JSON.parse((await br.handleLine(call(id)))[0]!).result.content[0].text as string;
+    expect(await text(5)).not.toContain("get_access_status");
+    listed = ["company_brief", "get_access_status"];
+    await br.handleLine(JSON.stringify({ jsonrpc: "2.0", id: 6, method: "tools/list" }));
+    expect(await text(7)).toContain("get_access_status");
+  });
+
+  it("an isError tool result from a 429 passes through untouched when the tool is not offered", async () => {
+    const body = (id: unknown) => ({
+      jsonrpc: "2.0",
+      id,
+      result: { isError: true, content: [{ type: "text", text: "Quota. Upgrade: https://x" }] },
+    });
+    const f = fakeFetch((b) => ({ status: 429, body: body(b.id) }));
+    const out = JSON.parse((await new Bridge(cfg("k"), f.impl).handleLine(call(8)))[0]!);
+    expect(out).toEqual(body(8));
   });
 
   it("network failure and non-JSON bodies become JSON-RPC errors for requests", async () => {

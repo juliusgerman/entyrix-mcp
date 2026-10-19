@@ -35,6 +35,20 @@ export interface BridgeConfig {
 type Json = Record<string, unknown>;
 type FetchLike = (url: string, init: RequestInit) => Promise<Response>;
 
+const NEXT_STEP_STATUSES = new Set([402, 403, 429]);
+const ACCESS_STATUS_TOOL = "get_access_status";
+
+/** How to get a key, one text for every "you have no access" message. */
+export function accessHelp(base: string): string {
+  return [
+    "Ways to get access:",
+    `1. Sign in at ${base}/login - an account comes with a Free API key. Set it as ENTYRIX_API_KEY.`,
+    `2. Without a browser: POST ${base}/api/v1/signup with JSON {"email": "...", "accept_terms": "<current terms version>"} (terms: ${base}/terms; a wrong value is answered with the current version), then POST ${base}/api/v1/signup/verify with {"email": "...", "code": "<code from the e-mail>"}. The response contains api_key, shown once.`,
+    `3. Remote MCP server with OAuth, no key in a config file: ${base}/mcp - the client signs you in itself.`,
+    `Plans and limits: ${base}/pricing`,
+  ].join("\n");
+}
+
 const PV_META = "io.modelcontextprotocol/protocolVersion";
 
 function rpcError(id: unknown, code: number, message: string, data?: unknown): Json {
@@ -73,6 +87,8 @@ function parseSse(text: string): Json[] {
 export class Bridge {
   /** Version the server answered to `initialize` (legacy clients). */
   private negotiated: string | undefined;
+  /** Tool names from the last `tools/list`, to word hints by what the server really offers. */
+  private toolNames = new Set<string>();
   private readonly inflight = new Map<string, AbortController>();
   /** Requests the client cancelled — they get no response at all. */
   private readonly cancelled = new Set<string>();
@@ -201,13 +217,90 @@ export class Bridge {
         const pv = (m.result as Json).protocolVersion;
         if (typeof pv === "string") this.negotiated = pv;
       }
+      if (method === "tools/list" && m.result && typeof m.result === "object") {
+        this.rememberTools((m.result as Json).tools);
+      }
       if (res.status === 401 && m.error && typeof m.error === "object") {
         const e = m.error as Json;
-        e.message = this.config.apiKey
-          ? "ENTYRIX_API_KEY was rejected (invalid, expired or revoked). Issue a new key at https://entyrix.com/account."
-          : "This tool needs an Entyrix API key. Set ENTYRIX_API_KEY (get one at https://entyrix.com/api-signup) or connect to https://entyrix.com/mcp/v1 directly and sign in with OAuth.";
+        e.message = this.authMessage();
+        if (method === "tools/call") return JSON.stringify(this.asToolResult(m, e));
+      } else if (method === "tools/call" && NEXT_STEP_STATUSES.has(res.status)) {
+        const next = this.nextStep(m);
+        if (next) return JSON.stringify(next);
       }
       return JSON.stringify(m);
     });
+  }
+
+  private rememberTools(tools: unknown): void {
+    if (!Array.isArray(tools)) return;
+    this.toolNames = new Set(
+      tools.flatMap((t) =>
+        t && typeof t === "object" && typeof (t as Json).name === "string"
+          ? [(t as Json).name as string]
+          : []
+      )
+    );
+  }
+
+  private authMessage(): string {
+    const base = this.config.baseUrl.replace(/\/+$/, "");
+    return this.config.apiKey
+      ? `ENTYRIX_API_KEY was rejected (invalid, expired or revoked). Issue a new key after signing in at ${base}/login, or see ${base}/pricing for plans.`
+      : `This tool needs an Entyrix API key and ENTYRIX_API_KEY is not set. ${accessHelp(base)}`;
+  }
+
+  /** A failed tool call as an MCP tool result (`isError`), which a model reads as the answer. */
+  private asToolResult(m: Json, e: Json): Json {
+    const content: Array<{ type: "text"; text: string }> = [
+      { type: "text", text: String(e.message) },
+    ];
+    if (e.data !== undefined) {
+      content.push({ type: "text", text: `Server access offer: ${JSON.stringify(e.data)}` });
+    }
+    return { jsonrpc: "2.0", id: m.id ?? null, result: { content, isError: true } };
+  }
+
+  /**
+   * 402 / 403 / 429: say what to do next. The server's own `message` and
+   * `upgrade` offer are repeated verbatim, wherever it put them (JSON-RPC
+   * `error.data`, or an `isError` tool result). The pointer to
+   * `get_access_status` appears only when the server actually lists that tool.
+   */
+  private nextStep(m: Json): Json | undefined {
+    const lines: string[] = [];
+    let result: Json | undefined;
+    if (m.error && typeof m.error === "object") {
+      const e = m.error as Json;
+      if (typeof e.message === "string") lines.push(e.message);
+      const d = e.data && typeof e.data === "object" ? (e.data as Json) : undefined;
+      if (d) {
+        if (typeof d.message === "string" && d.message !== e.message) lines.push(d.message);
+        const meta = d.meta && typeof d.meta === "object" ? (d.meta as Json) : undefined;
+        const ao =
+          meta?.access_offer && typeof meta.access_offer === "object"
+            ? (meta.access_offer as Json)
+            : undefined;
+        const upgrade = d.upgrade ?? ao?.upgrade;
+        if (upgrade !== undefined) lines.push(`Upgrade: ${JSON.stringify(upgrade)}`);
+      }
+    } else if (m.result && typeof m.result === "object") {
+      result = m.result as Json;
+      if (result.isError !== true) return undefined;
+    } else {
+      return undefined;
+    }
+    const hint = this.toolNames.has(ACCESS_STATUS_TOOL)
+      ? `Access status and a payment link: tool ${ACCESS_STATUS_TOOL}.`
+      : undefined;
+    if (result) {
+      if (!hint) return undefined;
+      const content = Array.isArray(result.content) ? [...result.content] : [];
+      content.push({ type: "text", text: hint });
+      return { ...m, result: { ...result, content } };
+    }
+    if (hint) lines.push(hint);
+    const content = [{ type: "text", text: lines.join("\n") }];
+    return { jsonrpc: "2.0", id: m.id ?? null, result: { content, isError: true } };
   }
 }

@@ -22,7 +22,7 @@ const bridge = new Bridge({
 
 if (!process.env.ENTYRIX_API_KEY) {
   process.stderr.write(
-    "[entyrix-mcp] ENTYRIX_API_KEY is not set — discovery and public tools work, data tools will ask for a key.\n"
+    "[entyrix-mcp] ENTYRIX_API_KEY is not set — discovery and public tools work, the first data tool call will explain how to get one (https://entyrix.com/login).\n"
   );
 }
 
