@@ -116,6 +116,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          curl -s -H "Title: entyrix-mcp release failed" -H "Tags: rotating_light" \
+          curl -sf -H "Title: entyrix-mcp release failed" -H "Tags: rotating_light" \
             -d "${{ github.ref_name }} failed — ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
-            https://ntfy.sh/inger-deploy-alerts || true
+            https://ntfy.sh/inger-deploy-alerts
